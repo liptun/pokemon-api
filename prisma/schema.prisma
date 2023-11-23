@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Trainer {
+  id             Int              @id @default(autoincrement())
+  name           String
+  name_jp        String?
+  catchedPokemon CatchedPokemon[]
+}
+
+model Pokemon {
+  no             Int              @id
+  name           String
+  name_jp        String?
+  species        String?
+  description    String?          @db.Text()
+
+  CatchedPokemon CatchedPokemon[]
+}
+
+model CatchedPokemon {
+  id        Int     @id @default(autoincrement())
+  pokemon   Pokemon @relation(fields: [pokemonNo], references: [no])
+  pokemonNo Int
+  name      String?
+  name_jp   String?
+
+  trainer   Trainer @relation(fields: [trainerId], references: [id])
+  trainerId Int
+}
