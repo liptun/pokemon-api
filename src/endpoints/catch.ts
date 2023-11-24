@@ -1,8 +1,54 @@
-import { RequestHandler } from "express";
+import express from "express";
 import z from "zod";
 import { prisma } from "..";
 
-export const catchPokemon: RequestHandler = async (req, res) => {
+export const catchRouter = express.Router();
+
+/**
+ * @swagger
+ * /catch:
+ *   post:
+ *     summary: Record a new Pokemon catch
+ *     description: Record a new Pokemon catch with the provided payload.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               trainerId:
+ *                 type: number
+ *               pokemonNo:
+ *                 type: number
+ *               name:
+ *                 type: string
+ *                 nullable: true
+ *               name_jp:
+ *                 type: string
+ *                 nullable: true
+ *             required:
+ *               - trainerId
+ *               - pokemonNo
+ *     responses:
+ *       '201':
+ *         description: Successful creation
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 9
+ *               pokemonNo: 1
+ *               trainerid: 1
+ *               name: null
+ *               name_jp: null
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+catchRouter.post("/catch", async (req, res) => {
     const payloadSchema = z
         .object({
             trainerId: z.number(),
@@ -22,9 +68,44 @@ export const catchPokemon: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
 
-export const deleteCatch: RequestHandler = async (req, res) => {
+/**
+ * @swagger
+ * /catch:
+ *   delete:
+ *     summary: Delete a recorded Pokemon catch by ID
+ *     description: Delete a recorded Pokemon catch based on the provided payload containing the catch ID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: number
+ *             required:
+ *               - id
+ *     responses:
+ *       '200':
+ *         description: Successful deletion
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 9
+ *               pokemonNo: 1
+ *               trainerid: 1
+ *               name: null
+ *               name_jp: null
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+catchRouter.delete("/catch", async (req, res) => {
     const payloadSchema = z
         .object({
             id: z.number(),
@@ -42,9 +123,56 @@ export const deleteCatch: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
 
-export const updateCatch: RequestHandler = async (req, res) => {
+/**
+ * @swagger
+ * /catch:
+ *   patch:
+ *     summary: Update a recorded Pokemon catch by ID
+ *     description: Update a recorded Pokemon catch based on the provided payload containing the catch ID and optional new values.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: number
+ *               trainerId:
+ *                 type: number
+ *                 nullable: true
+ *               pokemonNo:
+ *                 type: number
+ *                 nullable: true
+ *               name:
+ *                 type: string
+ *                 nullable: true
+ *               name_jp:
+ *                 type: string
+ *                 nullable: true
+ *             required:
+ *               - id
+ *     responses:
+ *       '200':
+ *         description: Successful update
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 9
+ *               pokemonNo: 1
+ *               trainerid: 1
+ *               name: null
+ *               name_jp: null
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+catchRouter.patch("/catch", async (req, res) => {
     const payloadSchema = z
         .object({
             id: z.number(),
@@ -59,11 +187,14 @@ export const updateCatch: RequestHandler = async (req, res) => {
         const validatePayload = payloadSchema.parse(req.body);
         const { id } = validatePayload;
 
-        const deletedCatch = await prisma.catchedPokemon.update({ where: { id }, data: {...validatePayload, id: undefined} });
+        const deletedCatch = await prisma.catchedPokemon.update({
+            where: { id },
+            data: { ...validatePayload, id: undefined },
+        });
         res.status(200);
         res.json(deletedCatch);
     } catch (e) {
         res.status(400);
         res.json(e);
     }
-};
+});

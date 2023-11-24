@@ -1,33 +1,23 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import { getPokemon, getPokemons } from "./endpoints/pokemon";
-import { createTrainer, deleteTrainer, getTrainer, getTrainers } from "./endpoints/trainer";
-import { catchPokemon, deleteCatch, updateCatch } from "./endpoints/catch";
+import swaggerUi from 'swagger-ui-express'
+import { swaggerSpec } from "./swagger";
+import { trainerRouter } from "./endpoints/trainer";
+import { pokemonRouter } from "./endpoints/pokemon";
+import { catchRouter } from "./endpoints/catch";
+
+
+const port = process.env.PORT ?? 3000;
 
 export const prisma = new PrismaClient();
 
 const app = express();
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const port = process.env.PORT ?? 3000;
-
-const baseUrl = "/api/v1";
-
-app.get("/", (_, res) => {
-    res.json({ message: "API is available under /api/v1" });
-});
-
-app.get(`${baseUrl}/pokemon/:id`, getPokemon);
-app.get(`${baseUrl}/pokemon`, getPokemons);
-
-app.get(`${baseUrl}/trainer/:id`, getTrainer);
-app.get(`${baseUrl}/trainer`, getTrainers);
-app.post(`${baseUrl}/trainer`, createTrainer);
-app.delete(`${baseUrl}/trainer`, deleteTrainer);
-
-app.post(`${baseUrl}/catch`, catchPokemon);
-app.delete(`${baseUrl}/catch`, deleteCatch);
-app.patch(`${baseUrl}/catch`, updateCatch);
+app.use(pokemonRouter);
+app.use(trainerRouter);
+app.use(catchRouter);
 
 app.all("*", (_, res) => {
     res.status(404);
