@@ -4,12 +4,12 @@ const options: swaggerJsdoc.Options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "Your API",
+            title: "Pokemon API",
             version: "1.0.0",
-            description: "API documentation using Swagger JSDoc",
+            description: "Pokemons REST API",
         },
     },
-    apis: ["./src/endpoints/*.ts"],
+    apis: ["./src/endpoints/**/*.ts"],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
