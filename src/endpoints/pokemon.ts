@@ -1,7 +1,44 @@
-import { RequestHandler } from "express";
+import express from "express";
 import { prisma } from "..";
 
-export const getPokemon: RequestHandler = async (req, res) => {
+export const pokemonRouter = express.Router();
+
+/**
+ * @swagger
+ * /pokemon/{id}:
+ *   get:
+ *     summary: Get a Pokemon by ID
+ *     description: Retrieve Pokemon details based on the provided ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the Pokemon to retrieve.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               name: Pikachu
+ *               type: Electric
+ *       '400':
+ *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - invalid Pokemon ID"
+ *       '404':
+ *         description: Pokemon not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "404 - Pokemon not found"
+ */
+pokemonRouter.get("/pokemon/:id", async (req, res) => {
     const id = parseInt(req.params.id?.toString());
 
     if (isNaN(id)) {
@@ -21,9 +58,41 @@ export const getPokemon: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
 
-export const getPokemons: RequestHandler = async (req, res) => {
+/**
+ * @swagger
+ * /pokemon:
+ *   get:
+ *     summary: Get a list of Pokemon
+ *     description: Retrieve a list of Pokemon based on the specified limit.
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         description: The maximum number of Pokemon to retrieve (default is 10).
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: 1
+ *                 name: Pikachu
+ *                 type: Electric
+ *               - id: 2
+ *                 name: Bulbasaur
+ *                 type: Grass/Poison
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+pokemonRouter.get("/pokemon", async (req, res) => {
     const limit = req.query.limit?.toString() || "10";
 
     try {
@@ -35,4 +104,4 @@ export const getPokemons: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});

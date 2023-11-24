@@ -1,8 +1,52 @@
-import { RequestHandler } from "express";
+import express from "express";
 import { prisma } from "..";
 import z from "zod";
 
-export const getTrainer: RequestHandler = async (req, res) => {
+export const trainerRouter = express.Router();
+
+/**
+ * @swagger
+ * /trainer/{id}:
+ *   get:
+ *     summary: Get a Trainer by ID
+ *     description: Retrieve Trainer details and the list of caught Pokemon based on the specified Trainer ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the Trainer to retrieve.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               name: Ash Ketchum
+ *               name_jp: Satoshi
+ *               pokemons:
+ *                 - id: 123
+ *                   no: 25
+ *                   name: Pikachu
+ *                   name_jp: Pikachu
+ *                   species: Electric Mouse Pokemon
+ *                   description: A cute and powerful Electric-type Pokemon.
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ *       '404':
+ *         description: Trainer not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "404 - Trainer not found"
+ */
+trainerRouter.get('/trainer/:id', async (req, res) => {
     const id = parseInt(req.params.id?.toString());
 
     if (isNaN(id)) {
@@ -47,9 +91,42 @@ export const getTrainer: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
 
-export const getTrainers: RequestHandler = async (req, res) => {
+/**
+ * @swagger
+ * /trainer:
+ *   get:
+ *     summary: Get a list of Trainers
+ *     description: Retrieve a list of Trainers based on the specified limit.
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         description: The maximum number of Trainers to retrieve (default is 10).
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: 1
+ *                 name: "doenutt_"
+ *                 name_jp: "ドエヌット"
+ *               - id: 2
+ *                 name: "LiptuN"
+ *                 name_jp: "リプトゥンノ"
+
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+trainerRouter.get('/trainer', async (req, res) => {
     const limit = req.query.limit?.toString() || "10";
 
     try {
@@ -67,13 +144,51 @@ export const getTrainers: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
 
-export const createTrainer: RequestHandler = async (req, res) => {
-    const payloadSchema = z.object({
-        name: z.string().min(1),
-        name_jp: z.string(),
-    }).strict();
+/**
+ * @swagger
+ * /trainer:
+ *   post:
+ *     summary: Create a new Trainer
+ *     description: Create a new Trainer with the provided payload.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 1
+ *               name_jp:
+ *                 type: string
+ *             required:
+ *               - name
+ *     responses:
+ *       '201':
+ *         description: Successful creation
+ *         content:
+ *           application/json:
+ *             example: 
+ *               id: 1
+ *               name: 'Foo'
+ *               name_jp: 'Bar'
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+trainerRouter.post('/trainer', async (req, res) => {
+    const payloadSchema = z
+        .object({
+            name: z.string().min(1),
+            name_jp: z.string(),
+        })
+        .strict();
 
     try {
         const validatePayload = payloadSchema.parse(req.body);
@@ -85,9 +200,39 @@ export const createTrainer: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
 
-export const deleteTrainer: RequestHandler = async (req, res) => {
+/**
+ * @swagger
+ * /trainer:
+ *   delete:
+ *     summary: Delete a Trainer by ID
+ *     description: Delete a Trainer based on the provided payload containing the Trainer ID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: number
+ *             required:
+ *               - id
+ *     responses:
+ *       '200':
+ *         description: Successful deletion
+ *         content:
+ *           application/json:
+ *             example: {}
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "400 - Bad Request"
+ */
+trainerRouter.delete('/trainer', async (req, res) => {
     const payloadSchema = z.object({
         id: z.number(),
     });
@@ -103,4 +248,4 @@ export const deleteTrainer: RequestHandler = async (req, res) => {
         res.status(400);
         res.json(e);
     }
-};
+});
