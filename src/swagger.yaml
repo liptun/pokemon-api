@@ -1,0 +1,290 @@
+openapi: 3.1.0
+info:
+    title: "Pokémon Catch API"
+    version: "1.0.0"
+    description: "API for managing Pokémon caught by trainers."
+
+tags:
+    - name: Pokemon
+    - name: Trainer
+    - name: Catch
+
+paths:
+    /pokemon:
+        get:
+            tags:
+                - Pokemon
+            summary: Get all pokemons list
+            description: Get all pokemons list
+            parameters:
+                - name: limit
+                  in: query
+                  schema:
+                      type: integer
+                      default: 10
+            responses:
+                200:
+                    $ref: "#/components/responses/Pokemon"
+    /pokemon/{pokemonNo}:
+        get:
+            tags:
+                - Pokemon
+            summary: Get pokemon by id
+            description: Get pokemon details by id
+            parameters:
+                - in: path
+                  name: pokemonNo
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    $ref: "#/components/responses/PokemonByNo"
+                400:
+                    $ref: "#/components/responses/BadRequest"
+                404:
+                    $ref: "#/components/responses/NotFound"
+    /trainer:
+        get:
+            tags:
+                - Trainer
+            summary: Get all trainers list
+            description: Get all trainers list
+            parameters:
+                - name: limit
+                  in: query
+                  schema:
+                      type: integer
+                      default: 10
+            responses:
+                200:
+                    $ref: "#/components/responses/Trainer"
+
+        post:
+            tags:
+                - Trainer
+            summary: Create new Trainer
+            description: Create new Trainer with provided json payload
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                name_jp:
+                                    type: string
+                            required:
+                                - name
+            responses:
+                201:
+                    description: Created
+                    content:
+                        application/json:
+                            example:
+                                id: 11
+                                name: Foo
+                                name_jp: Bar
+
+                400:
+                    $ref: "#/components/responses/BadRequest"
+
+        patch:
+            tags:
+                - Trainer
+            summary: Edit existing Trainer
+            description: Edit existing Trainer with provided json payload
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                id:
+                                    type: integer
+                                name:
+                                    type: string
+                                name_jp:
+                                    type: string
+            required:
+                - id
+
+            responses:
+                400:
+                    $ref: "#/components/responses/BadRequest"
+                404:
+                    $ref: "#/components/responses/NotFound"
+    /trainer/{trainerId}:
+        get:
+            tags:
+                - Trainer
+            summary: Get Trainer by id
+            description: Get Trainer by id
+            parameters:
+                - in: path
+                  name: trainerId
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    $ref: "#/components/responses/TrainerById"
+                400:
+                    $ref: "#/components/responses/BadRequest"
+                404:
+                    $ref: "#/components/responses/NotFound"
+        delete:
+            tags:
+                - Trainer
+            summary: Delete Trainer by id
+            description: Delete Trainer by id
+            parameters:
+                - in: path
+                  name: trainerId
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Deleted
+                    content:
+                        application/json:
+                            example:
+                                id: 11
+                                name: Foo
+                                name_jp: Bar
+
+                400:
+                    $ref: "#/components/responses/BadRequest"
+                404:
+                    $ref: "#/components/responses/NotFound"
+    /catch:
+        post:
+            tags:
+                - Catch
+            summary: Catch Pokemon by Trainer
+            name: Catch Pokemon by Trainer
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                trainerId:
+                                    type: integer
+                                pokemonNo:
+                                    type: integer
+                            required:
+                                - trainerId
+                                - pokemonNo
+            responses:
+                400:
+                    $ref: "#/components/responses/BadRequest"
+
+        patch:
+            tags:
+                - Catch
+            summary: Edit Catch
+            name: Edit Catch
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                id:
+                                    type: integer
+                                trainerId:
+                                    type: integer
+                                pokemonNo:
+                                    type: integer
+                            required:
+                                - id
+    /catch/{catchId}:
+        delete:
+            tags:
+                - Catch
+            summary: Delete Catch
+            name: Delete Catch
+            parameters:
+                - in: path
+                  name: catchId
+                  required: true
+                  schema:
+                      type: integer
+
+components:
+    responses:
+        BadRequest:
+            description: Bad Request
+            content:
+                application/json:
+                    example:
+                        error: "400 - Bad Request"
+        NotFound:
+            description: Not Found
+            content:
+                application/json:
+                    example:
+                        error: "404 - Not found"
+        Pokemon:
+            description: Succesfull response
+            content:
+                application/json:
+                    example:
+                        - no: 1
+                          name: Bulbasaur
+                          name_jp: フシギダネ
+                          species: Seed Pokémon
+                          description: "Bulbasaur can be seen napping in bright sunlight. There is a seed on its back. By soaking up the sun’s rays, the seed grows progressively larger."
+                        - no: 2
+                          name: Ivysaur
+                          name_jp: フシギソウ
+                          species: Seed Pokémon
+                          description: "There is a bud on this Pokémon’s back. To support its weight, Ivysaur’s legs and trunk grow thick and strong. If it starts spending more time lying in the sunlight, it’s a sign that the bud will bloom into a large flower soon."
+                        - no: 3
+                          name: Venusaur
+                          name_jp: フシギバナ
+                          species: Seed Pokémon
+                          description: "There is a large flower on Venusaur’s back. The flower is said to take on vivid colors if it gets plenty of nutrition and sunlight. The flower’s aroma soothes the emotions of people."
+        PokemonByNo:
+            description: Succesfull response
+            content:
+                application/json:
+                    example:
+                        no: 1
+                        name: Bulbasaur
+                        name_jp: フシギダネ
+                        species: Seed Pokémon
+                        description: "Bulbasaur can be seen napping in bright sunlight. There is a seed on its back. By soaking up the sun’s rays, the seed grows progressively larger."
+        Trainer:
+            description: Succesfull response
+            content:
+                application/json:
+                    example:
+                        - id: 1
+                          name: "doenutt_"
+                          name_jp: "ドエヌット"
+                        - id: 2
+                          name: "LiptuN"
+                          name_jp: "リプトゥンノ"
+        TrainerById:
+            description: Succesfull response
+            content:
+                application/json:
+                    example:
+                        id: 2
+                        name: "LiptuN"
+                        name_jp: "リプトゥンノ"
+                        pokemons:
+                            - id: 3
+                              no: 50
+                              name: "Diglett"
+                              name_jp: "ディグダ"
+                              species: "Mole Pokémon"
+                              description: "Around their crops, farmers plant the kind of tree that Diglett like to eat as a way of getting Diglett to plow the fields for them."

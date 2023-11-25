@@ -1,11 +1,18 @@
+import fs from "fs";
+import path from "path";
+
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import swaggerUi from 'swagger-ui-express'
-import { swaggerSpec } from "./swagger";
+import swaggerUi from "swagger-ui-express";
+
 import { trainerRouter } from "./endpoints/trainer";
 import { pokemonRouter } from "./endpoints/pokemon";
 import { catchRouter } from "./endpoints/catch";
+import { parse } from "yaml";
 
+const file = fs.readFileSync(path.join(__dirname, "swagger.yaml"), "utf8");
+
+const swaggerSpec = parse(file);
 
 const port = process.env.PORT ?? 3000;
 
@@ -13,7 +20,7 @@ export const prisma = new PrismaClient();
 
 const app = express();
 app.use(express.json());
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(pokemonRouter);
 app.use(trainerRouter);
