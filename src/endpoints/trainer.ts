@@ -75,7 +75,7 @@ trainerRouter.post("/trainer", async (req, res) => {
     const payloadSchema = z
         .object({
             name: z.string().min(1),
-            name_jp: z.string(),
+            name_jp: z.string().optional(),
         })
         .strict();
 
@@ -92,14 +92,10 @@ trainerRouter.post("/trainer", async (req, res) => {
 });
 
 trainerRouter.delete("/trainer/:id", async (req, res) => {
-    const id = parseInt(req.params.id?.toString());
+    const idSchema = z.number();
 
-    if (isNaN(id)) {
-        res.status(400);
-        res.json({ error: "400 - invalid trainer id" });
-        return;
-    }
     try {
+        const id = idSchema.parse(parseInt(req.params.id));
         const deletedTrainer = await prisma.trainer.delete({ where: { id } });
         res.status(200);
         res.json(deletedTrainer);

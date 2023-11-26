@@ -1,17 +1,14 @@
 import express from "express";
 import { prisma } from "../app";
+import z from "zod";
 
 export const pokemonRouter = express.Router();
 
 pokemonRouter.get("/pokemon/:id", async (req, res) => {
-    const id = parseInt(req.params.id?.toString());
+    const idSchema = z.number();
 
-    if (isNaN(id)) {
-        res.status(400);
-        res.json({ error: "400 - invalid pokemon no" });
-        return;
-    }
     try {
+        const id = idSchema.parse(parseInt(req.params.id));
         const pokemon = await prisma.pokemon.findFirst({ where: { no: id } });
         if (pokemon === null) {
             res.status(404);

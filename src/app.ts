@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
 import { PrismaClient } from "@prisma/client";
 import swaggerUi from "swagger-ui-express";
 
@@ -21,6 +21,16 @@ export const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const badJsonHandler: ErrorRequestHandler = (err, _req, res, next) => {
+    if (err instanceof SyntaxError) {
+        res.status(400)
+        res.json({ error: err.name, message: err.message });
+        return;
+    }
+    next();
+};
+app.use(badJsonHandler);
 
 app.use(pokemonRouter);
 app.use(trainerRouter);
