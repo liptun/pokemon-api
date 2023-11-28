@@ -15,14 +15,16 @@ model Trainer {
   name           String
   name_jp        String?
   catchedPokemon CatchedPokemon[]
+  createdBy      User?            @relation(fields: [userId], references: [id])
+  userId         Int?
 }
 
 model Pokemon {
-  no             Int              @id
-  name           String
-  name_jp        String?
-  species        String?
-  description    String?          @db.Text()
+  no          Int     @id
+  name        String
+  name_jp     String?
+  species     String?
+  description String? @db.Text()
 
   CatchedPokemon CatchedPokemon[]
 }
@@ -36,4 +38,14 @@ model CatchedPokemon {
 
   trainer   Trainer @relation(fields: [trainerId], references: [id])
   trainerId Int
+  createdBy User?   @relation(fields: [userId], references: [id])
+  userId    Int?
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  password       String
+  Trainer        Trainer[]
+  CatchedPokemon CatchedPokemon[]
 }
