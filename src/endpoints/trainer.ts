@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../app";
 import z from "zod";
+import { authMiddleware } from "../utils";
 
 export const trainerRouter = express.Router();
 
@@ -71,7 +72,7 @@ trainerRouter.get("/trainer", async (req, res) => {
     }
 });
 
-trainerRouter.post("/trainer", async (req, res) => {
+trainerRouter.post("/trainer", authMiddleware, async (req, res) => {
     const payloadSchema = z
         .object({
             name: z.string().min(1),
@@ -81,8 +82,9 @@ trainerRouter.post("/trainer", async (req, res) => {
 
     try {
         const validatePayload = payloadSchema.parse(req.body);
+        const { user } = res.locals;
 
-        const newTrainer = await prisma.trainer.create({ data: { ...validatePayload } });
+        const newTrainer = await prisma.trainer.create({ data: { ...validatePayload, userId: user.id } });
         res.status(201);
         res.json(newTrainer);
     } catch (e) {
@@ -91,7 +93,7 @@ trainerRouter.post("/trainer", async (req, res) => {
     }
 });
 
-trainerRouter.delete("/trainer/:id", async (req, res) => {
+trainerRouter.delete("/trainer/:id", authMiddleware, async (req, res) => {
     const idSchema = z.number();
 
     try {

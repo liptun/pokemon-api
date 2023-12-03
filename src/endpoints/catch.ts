@@ -1,10 +1,11 @@
 import express from "express";
 import z from "zod";
 import { prisma } from "../app";
+import { authMiddleware } from "../utils";
 
 export const catchRouter = express.Router();
 
-catchRouter.post("/catch", async (req, res) => {
+catchRouter.post("/catch", authMiddleware, async (req, res) => {
     const payloadSchema = z
         .object({
             trainerId: z.number(),
@@ -16,8 +17,9 @@ catchRouter.post("/catch", async (req, res) => {
 
     try {
         const validatePayload = payloadSchema.parse(req.body);
+        const { user } = res.locals;
 
-        const newCatch = await prisma.catchedPokemon.create({ data: { ...validatePayload } });
+        const newCatch = await prisma.catchedPokemon.create({ data: { ...validatePayload, userId: user.id } });
         res.status(201);
         res.json(newCatch);
     } catch (e) {
@@ -26,7 +28,7 @@ catchRouter.post("/catch", async (req, res) => {
     }
 });
 
-catchRouter.delete("/catch/:id", async (req, res) => {
+catchRouter.delete("/catch/:id", authMiddleware, async (req, res) => {
     const id = parseInt(req.params.id?.toString());
 
     if (isNaN(id)) {
@@ -44,7 +46,7 @@ catchRouter.delete("/catch/:id", async (req, res) => {
     }
 });
 
-catchRouter.patch("/catch", async (req, res) => {
+catchRouter.patch("/catch", authMiddleware, async (req, res) => {
     const payloadSchema = z
         .object({
             id: z.number(),

@@ -1,5 +1,5 @@
 import jwt, { JsonWebTokenError, JwtPayload, TokenExpiredError } from "jsonwebtoken";
-import { RequestHandler } from "express";
+import { Request, RequestHandler } from "express";
 import * as crypto from "crypto";
 import z from "zod";
 
@@ -12,8 +12,10 @@ class TokenError extends Error {
     }
 }
 
+const userSchema = z.object({ name: z.string(), id: z.number(), iat: z.number(), exp: z.number() });
+export type User = z.infer<typeof userSchema>;
 export type AuthMiddlewareLocals = {
-    user: JwtPayload | string;
+    user: User;
 };
 
 type AuthorizationRequestHandler = RequestHandler<any, any, any, any, AuthMiddlewareLocals>;
@@ -25,7 +27,8 @@ export const authMiddleware: AuthorizationRequestHandler = (req, res, next) => {
             const tokenSchema = z.tuple([z.literal("Bearer"), z.string()]);
             const [_, token] = tokenSchema.parse(authHeader.split(" "));
             const decoded = jwt.verify(token, process.env.JWT_SECRET ?? "");
-            res.locals.user = decoded;
+            const validated = userSchema.parse(decoded);
+            res.locals.user = validated;
             next();
         } else {
             throw new TokenError("Bearer token is missing");
